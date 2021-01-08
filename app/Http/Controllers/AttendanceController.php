@@ -16,18 +16,39 @@
         }
         
         public function getAttendances(){
-            $attendance = Attendance::all();
+            $attendance = Attendance::select('tbl_attendance.*')
+            ->leftJoin('tbl_student','tbl_attendance.student_id','=','tbl_student.student_id')
+            ->leftJoin('tbl_event','tbl_attendance.event_id','=','tbl_event.event_id')
+            ->select('tbl_attendance.att_id','tbl_event.event_name','tbl_student.student_name','tbl_student.student_year','tbl_student.student_gender','tbl_student.student_contact','tbl_student.student_email')->get();
+            
             return $this->successResponse($attendance);
         }
 
         public function getEventAttendance($event_id){
             $attendance = Attendance::where('event_id',$event_id)->get();
-            return $this->successResponse($attendance);
+            if($attendance == null) return $this->errorResponse('No Such event in the database',404);
+
+
+            $attendanceEvent = Attendance::where('tbl_attendance.event_id',$event_id)
+            ->leftJoin('tbl_student','tbl_attendance.student_id','=','tbl_student.student_id')
+            ->leftJoin('tbl_event','tbl_attendance.event_id','=','tbl_event.event_id')
+            ->select('tbl_attendance.att_id','tbl_event.event_name','tbl_student.student_name','tbl_student.student_year','tbl_student.student_gender','tbl_student.student_contact','tbl_student.student_email')->get();
+
+            return $this->successResponse($attendanceEvent);
         }
 
         public function getStudentAttendance($student_id){
             $attendance = Attendance::where('student_id',$student_id)->get();
-            return $this->successResponse($attendance);
+
+            if($attendance == null) return $this->errorResponse('No Such Student in the database',404);
+
+            $attendanceStudent = Attendance::where('tbl_attendance.student_id',$student_id)
+            ->leftJoin('tbl_student','tbl_attendance.student_id','=','tbl_student.student_id')
+            ->leftJoin('tbl_event','tbl_attendance.event_id','=','tbl_event.event_id')
+            ->select('tbl_attendance.att_id','tbl_event.event_name','tbl_student.student_name','tbl_student.student_year','tbl_student.student_gender','tbl_student.student_contact','tbl_student.student_email')->get();
+
+
+            return $this->successResponse($attendanceStudent);
         }
 
         public function addAttendance(Request $request){

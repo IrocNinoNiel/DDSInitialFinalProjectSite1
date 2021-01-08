@@ -33,9 +33,13 @@
             return $this->successResponse('User Verify');
         }
 
+       
         public function getUsers(){
 
-            $user = User::all();
+            $user = User::select('tbl_user.*')
+            ->leftJoin('tbl_student','tbl_user.student_id','=','tbl_user.student_id')
+            ->select('tbl_user.user_name','tbl_user.user_pass','tbl_student.student_name','tbl_student.student_year','tbl_student.student_gender','tbl_student.student_contact','tbl_student.student_email','tbl_user.role_id')->first();
+
             return $this->successResponse($user);
 
         }
@@ -43,7 +47,11 @@
         public function getUser($user_id){
             $user = User::find($user_id);
             if($user == null) return $this->errorResponse('No Such User in the database',404);
-            return $this->successResponse($user);
+
+            $userCredentials = User::where('user_id',$user_id)
+                ->leftJoin('tbl_student','tbl_user.student_id','=','tbl_student.student_id')
+                ->select('tbl_user.user_name','tbl_user.user_pass','tbl_student.student_name','tbl_student.student_year','tbl_student.student_gender','tbl_student.student_contact','tbl_student.student_email','tbl_user.role_id')->first();
+            return $this->successResponse($userCredentials);
         }
 
         public function addUser(Request $request){
